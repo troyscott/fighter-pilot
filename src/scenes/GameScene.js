@@ -64,7 +64,7 @@ export class GameScene extends Phaser.Scene {
 
   enemyHitPlayer(player, enemy) {
     // For MVP: just restart the scene
-    this.scene.restart();
+    this.scene.start('GameOverScene', { score: this.score });
     this.score = 0;
   }
 }
