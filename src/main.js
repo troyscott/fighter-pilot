@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { PreloadScene } from './scenes/PreloadScene.js';
 import { MenuScene } from './scenes/MenuScene.js';
 import { GameScene } from './scenes/GameScene.js';
 import { GameOverScene } from './scenes/GameOverScene.js';
@@ -16,7 +17,7 @@ const config = {
       debug: false  // set to true to see hitboxes
     }
   },
-  scene: [MenuScene, GameScene, GameOverScene] // menu scene first
+  scene: [PreloadScene, MenuScene, GameScene, GameOverScene] // Preload first
 };
 // Create the Phaser game instance
 const game = new Phaser.Game(config);

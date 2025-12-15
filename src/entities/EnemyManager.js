@@ -1,9 +1,14 @@
 import { ENEMY_CONFIG, GAME_CONFIG } from '../config/gameConfig.js';
+import { Enemy } from './Enemy.js';
 
 export class EnemyManager {
   constructor(scene) {
     this.scene = scene;
-    this.enemies = scene.physics.add.group();
+    this.enemies = scene.physics.add.group({
+      classType: Enemy,
+      maxSize: 50,
+      runChildUpdate: true
+    });
     this.lastSpawn = 0;
   }
 
@@ -13,34 +18,18 @@ export class EnemyManager {
       this.spawnEnemy();
       this.lastSpawn = time + ENEMY_CONFIG.spawnRate;
     }
-
-    // Remove enemies that go off screen
-    this.enemies.getChildren().forEach(enemy => {
-      if (enemy.y > GAME_CONFIG.height + 50) {
-        enemy.destroy();
-      }
-    });
   }
 
   spawnEnemy() {
     // Random x position
     const x = Phaser.Math.Between(30, GAME_CONFIG.width - 30);
-    
-    // Create simple enemy (red square for MVP)
-    const enemy = this.scene.add.rectangle(
-      x,
-      -20,  // spawn above screen
-      ENEMY_CONFIG.width,
-      ENEMY_CONFIG.height,
-      0xff4444  // red color
-    );
-    
-    this.scene.physics.add.existing(enemy);
-    //enemy.body.setVelocityY(ENEMY_CONFIG.speed);
-    this.enemies.add(enemy);
-    enemy.body.velocity.y = ENEMY_CONFIG.speed;
 
+    // Get enemy from pool
+    const enemy = this.enemies.get(x, -20);
 
+    if (enemy) {
+      enemy.spawn(x, -20);
+    }
   }
 
   getEnemies() {

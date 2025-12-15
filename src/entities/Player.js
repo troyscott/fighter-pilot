@@ -1,26 +1,25 @@
-import { PLAYER_CONFIG, BULLET_CONFIG, GAME_CONFIG } from '../config/gameConfig.js';
+import { PLAYER_CONFIG, GAME_CONFIG } from '../config/gameConfig.js';
+import { Bullet } from './Bullet.js';
 
 export class Player {
   constructor(scene) {
     this.scene = scene;
     this.lastFired = 0;
-    
-    // Create player ship (simple triangle)
-    this.sprite = scene.add.triangle(
+
+    // Create player ship using Sprite
+    this.sprite = scene.physics.add.sprite(
       GAME_CONFIG.width / 2,
       PLAYER_CONFIG.startY,
-      0, 20,
-      15, 0,
-      30, 20,
-      0x00ff88
+      'playerTexture'
     );
-    
-    // Enable physics
-    scene.physics.add.existing(this.sprite);
-    this.sprite.body.setCollideWorldBounds(true);
-    
-    // Bullet group
-    this.bullets = scene.physics.add.group();
+    this.sprite.setCollideWorldBounds(true);
+
+    // Bullet group using Object Pooling
+    this.bullets = scene.physics.add.group({
+      classType: Bullet,
+      maxSize: 30,
+      runChildUpdate: true
+    });
   }
 
   update(cursors, time) {
@@ -37,32 +36,17 @@ export class Player {
     }
   }
 
-  
-fire(time) {
-  const bullet = this.scene.add.rectangle(
-    this.sprite.x,
-    this.sprite.y - 20,
-    BULLET_CONFIG.width,
-    BULLET_CONFIG.height,
-    0xffff00
-  );
-  
-  this.scene.physics.add.existing(bullet);
-  this.bullets.add(bullet);
-  
-  // Set velocity AFTER adding to group
-  bullet.body.velocity.y = -500;
-  
-  this.lastFired = time + PLAYER_CONFIG.fireRate;
-}
+  fire(time) {
+    const bullet = this.bullets.get(this.sprite.x, this.sprite.y - 20);
 
+    if (bullet) {
+      bullet.fire(this.sprite.x, this.sprite.y - 20);
+      this.lastFired = time + PLAYER_CONFIG.fireRate;
+    }
+  }
 
   cleanupBullets() {
-    this.bullets.getChildren().forEach(bullet => {
-      if (bullet.y < -10) {
-        bullet.destroy();
-      }
-    });
+    // Handled by Bullet.preUpdate()
   }
 
   getBullets() {
